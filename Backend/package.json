@@ -1,0 +1,31 @@
+{
+  "name": "team-task-management",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@chroma-core/default-embed": "^0.1.9",
+    "@imagekit/nodejs": "^7.3.0",
+    "bcrypt": "^6.0.0",
+    "chromadb": "^3.5.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "nodemon": "^3.1.14",
+    "openai": "^7.3.0",
+    "pdf-parse": "^2.4.5",
+    "pg": "^8.23.1",
+    "pg-hstore": "^2.3.4",
+    "postgres": "^3.4.9",
+    "sequelize": "^6.37.8",
+    "zod": "^4.4.2"
+  }
+}

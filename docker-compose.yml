@@ -1,0 +1,22 @@
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: ai_admin_backend
+    restart: always
+    env_file:
+      - ./Backend/.env
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: ai_admin_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
