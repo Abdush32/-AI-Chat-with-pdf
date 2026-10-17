@@ -2,11 +2,11 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { store } from "../redux/store";
 
-let apiUrl;
+let apiUrl = "";
 if (document.URL.includes("localhost")) {
     apiUrl = "http://localhost:3000";
 } else {
-    apiUrl = "https://api.rajveda.com";
+    apiUrl = "";
 }
 
 const http = axios.create({
