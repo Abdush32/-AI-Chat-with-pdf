@@ -28,7 +28,6 @@ const ChatWithPdfPage = () => {
 
   // Form & inputs
   const [inputMessage, setInputMessage] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"docs" | "sessions">("docs");
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState<boolean>(false);

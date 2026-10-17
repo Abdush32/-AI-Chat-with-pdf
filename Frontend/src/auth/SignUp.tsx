@@ -1,7 +1,7 @@
 import Label from "../components/form/Label";
 import Checkbox from "../components/form/input/Checkbox";
 import Input from "../components/form/input/InputField";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../icons";
+import { EyeCloseIcon, EyeIcon } from "../icons";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import AuthLayout from "../layout/AuthPageLayout";
@@ -15,8 +15,6 @@ export default function SignUpForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
-
-  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
 
@@ -124,7 +122,6 @@ export default function SignUpForm() {
                           onChange: (e) => {
                             if (e.target.files && e.target.files[0]) {
                               const file = e.target.files[0];
-                              setProfileImageFile(file);
                               // Show temporary local preview while uploading
                               setProfileImage(URL.createObjectURL(file));
                               // Start real upload immediately

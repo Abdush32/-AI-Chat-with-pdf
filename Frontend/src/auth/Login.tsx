@@ -9,13 +9,11 @@ import user from "../services/auth";
 import { EyeCloseIcon, EyeIcon } from "../icons";
 import Label from "../components/form/Label";
 import Input from "../components/form/input/InputField";
-import Checkbox from "../components/form/input/Checkbox";
 import Button from "../components/ui/button/Button";
 import AuthLayout from "../layout/AuthPageLayout";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
