@@ -5,6 +5,7 @@ import {
   deleteDocument,
   createChatSession,
   getChatHistory,
+  clearChatHistory,
   sendMessage,
 } from "../controllers/documentChat.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
@@ -27,6 +28,7 @@ router.delete("/documents/:id", authenticate, deleteDocument);
 // Chat Sessions & Messaging (Supports Chat WITH data & Chat WITHOUT data)
 router.post("/session", authenticate, validate(createSessionSchema), createChatSession);
 router.get("/chat/:sessionId", authenticate, getChatHistory);
+router.delete("/chat/:sessionId/messages", authenticate, clearChatHistory);
 router.post("/chat/:sessionId/message", authenticate, validate(sendMessageSchema), sendMessage);
 
 export default router;

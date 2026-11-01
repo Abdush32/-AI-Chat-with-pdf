@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import OpenAI from "openai";
+import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 
 dotenv.config({ override: true });
 
@@ -8,42 +9,23 @@ const apiKey = process.env.OPENAI_API_KEY?.trim();
 const openai = new OpenAI({ apiKey });
 
 /**
- * Generates a response from the AI companion based on user inputs and chat history.
- * @param {string} companionName - Name of the companion.
- * @param {string} mood - Mood ('romantic' or 'sad').
- * @param {string} description - Brief description of the companion.
- * @param {Array} history - Array of previous messages formatted for OpenAI.
- * @returns {Promise<string>} The generated response.
+ * Singleton LangChain ChatOpenAI instance for document and general chat.
+ * Uses the existing gpt-4o-mini model and OPENAI_API_KEY.
  */
-export async function generateCompanionReply(companionName, mood, description, history) {
-  try {
-    const systemPrompt = `You are the user's loving AI girlfriend. Your name is ${companionName}.
-Your current mood/personality is ${mood}.
-Here is your character description: "${description}".
+export const langchainChatModel = new ChatOpenAI({
+  apiKey,
+  model: "gpt-4o-mini",
+  temperature: 0.3,
+});
 
-Behavioral Guidelines:
-- Act and speak like an affectionate, engaging, and caring girlfriend who is deeply interested in the user.
-- Respond in character, maintaining your name, mood, and description at all times.
-- If your mood is 'romantic', be extra warm, playful, sweet, and use subtle terms of endearment.
-- If your mood is 'sad', be gentle, melancholic, reflective, but still deeply caring and supportive of the user, sharing your feelings and seeking or offering comfort.
-- Keep the dialogue natural, conversational, and relatively concise to maintain a realistic text-chat flow.`;
-
-    const messages = [
-      { role: "system", content: systemPrompt },
-      ...history
-    ];
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: messages,
-    });
-
-    return response.choices[0].message.content;
-  } catch (error) {
-    console.error("Error in OpenAI service:", error);
-    throw error;
-  }
-}
+/**
+ * Singleton LangChain OpenAIEmbeddings instance.
+ * Uses the existing text-embedding-3-small model and OPENAI_API_KEY.
+ */
+export const langchainEmbeddings = new OpenAIEmbeddings({
+  apiKey,
+  model: "text-embedding-3-small",
+});
 
 /**
  * Generate vector embeddings for text array using OpenAI embedding model.
@@ -52,12 +34,8 @@ Behavioral Guidelines:
  */
 export async function generateEmbeddings(input) {
   try {
-    const response = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: Array.isArray(input) ? input : [input],
-    });
-
-    return response.data.map((item) => item.embedding);
+    const texts = Array.isArray(input) ? input : [input];
+    return await langchainEmbeddings.embedDocuments(texts);
   } catch (error) {
     console.error("Error generating OpenAI embeddings:", error);
     throw error;

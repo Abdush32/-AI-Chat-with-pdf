@@ -1,5 +1,7 @@
 import { CloudClient, ChromaClient } from "chromadb";
+import { Chroma } from "@langchain/community/vectorstores/chroma";
 import dotenv from "dotenv";
+import { langchainEmbeddings } from "./openai.service.js";
 
 dotenv.config({ override: true });
 
@@ -9,6 +11,7 @@ const apiKey =
 const tenant =
   process.env.CHROMA_TENANT || "0025f751-2726-4575-84e1-2911cb7d968b";
 const database = process.env.CHROMA_DATABASE || "genai";
+const chromaUrl = process.env.CHROMA_URL || "http://localhost:8000";
 
 let client;
 
@@ -19,7 +22,6 @@ if (typeof CloudClient === "function" && apiKey) {
     database,
   });
 } else {
-  const chromaUrl = process.env.CHROMA_URL || "http://localhost:8000";
   client = new ChromaClient({
     path: chromaUrl,
     tenant,
@@ -56,6 +58,7 @@ export async function getOrCreateCollection(collectionName) {
 
 /**
  * Add document chunks with embeddings to a Chroma collection.
+ * Preserved for existing ingestion & direct operations.
  * @param {string} collectionName
  * @param {Array<string>} chunks
  * @param {Array<Array<number>>} embeddings
@@ -88,21 +91,71 @@ export async function storeChunksInChroma(
 }
 
 /**
- * Query Chroma collection for nearest vector matches.
+ * Get a LangChain Chroma vector store instance bound to an existing or new collection.
+ * Uses the existing Chroma client and langchainEmbeddings without changing collection schema.
  * @param {string} collectionName
- * @param {Array<number>} queryEmbedding
+ * @returns {Chroma}
+ */
+export function getLangChainChromaStore(collectionName) {
+  return new Chroma(langchainEmbeddings, {
+    index: client,
+    collectionName,
+    collectionMetadata: { "hnsw:space": "cosine" },
+  });
+}
+
+/**
+ * Ingest LangChain Documents directly into Chroma using LangChain's Chroma vector store.
+ * @param {string} collectionName
+ * @param {Array<import("@langchain/core/documents").Document>} docs
+ * @param {Array<string>} [ids]
+ */
+export async function storeDocumentsInChroma(collectionName, docs, ids) {
+  try {
+    const vectorStore = getLangChainChromaStore(collectionName);
+    await vectorStore.addDocuments(docs, { ids });
+    return true;
+  } catch (error) {
+    console.error(
+      `Error storing LangChain documents in Chroma collection ${collectionName}:`,
+      error
+    );
+    throw error;
+  }
+}
+
+/**
+ * Query Chroma collection for nearest vector matches using LangChain similarity search.
+ * Returns text, metadata, and distance. Reads existing collections seamlessly.
+ * @param {string} collectionName
+ * @param {string|Array<number>} queryOrEmbedding
  * @param {number} nResults
  * @returns {Promise<Array<{text: string, metadata: object, distance: number}>>}
  */
 export async function queryChroma(
   collectionName,
-  queryEmbedding,
+  queryOrEmbedding,
   nResults = 4
 ) {
   try {
+    const vectorStore = getLangChainChromaStore(collectionName);
+
+    if (typeof queryOrEmbedding === "string") {
+      const resultsWithScore = await vectorStore.similaritySearchWithScore(
+        queryOrEmbedding,
+        nResults
+      );
+      return resultsWithScore.map(([doc, score]) => ({
+        text: doc.pageContent,
+        metadata: doc.metadata || {},
+        distance: score,
+      }));
+    }
+
+    // Direct embedding query fallback
     const collection = await getOrCreateCollection(collectionName);
     const results = await collection.query({
-      queryEmbeddings: [queryEmbedding],
+      queryEmbeddings: [queryOrEmbedding],
       nResults,
     });
 

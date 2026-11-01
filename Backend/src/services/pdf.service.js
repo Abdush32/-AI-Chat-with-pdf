@@ -1,5 +1,7 @@
 import { PDFParse } from "pdf-parse";
 import { createRequire } from "module";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { Document as LangChainDocument } from "@langchain/core/documents";
 
 const require = createRequire(import.meta.url);
 
@@ -57,7 +59,49 @@ export async function extractTextFromPDF(pdfBuffer) {
 }
 
 /**
- * Split text into overlapping chunks for embedding.
+ * Split text or LangChain Documents using LangChain's RecursiveCharacterTextSplitter.
+ * @param {string} text - Raw text to split.
+ * @param {object} [metadata={}] - Base metadata to attach to created documents.
+ * @param {number} [chunkSize=1000] - Maximum chunk size.
+ * @param {number} [chunkOverlap=200] - Overlap between chunks.
+ * @returns {Promise<Array<LangChainDocument>>} Array of LangChain Document instances.
+ */
+export async function splitTextIntoDocuments(
+  text,
+  metadata = {},
+  chunkSize = 1000,
+  chunkOverlap = 200
+) {
+  if (!text || text.trim().length === 0) {
+    return [];
+  }
+
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize,
+    chunkOverlap,
+    separators: ["\n\n", "\n", " ", ""],
+  });
+
+  const doc = new LangChainDocument({
+    pageContent: text,
+    metadata,
+  });
+
+  const splitDocs = await splitter.splitDocuments([doc]);
+
+  // Ensure consistent chunkIndex in metadata
+  return splitDocs.map((splitDoc, index) => {
+    splitDoc.metadata = {
+      ...splitDoc.metadata,
+      chunkIndex: index,
+    };
+    return splitDoc;
+  });
+}
+
+/**
+ * Legacy chunking function maintained for backward compatibility.
+ * Delegates to splitTextIntoDocuments and returns raw string chunks.
  * @param {string} text - Raw text to split.
  * @param {number} chunkSize - Maximum characters per chunk (default 1000).
  * @param {number} overlap - Character overlap between consecutive chunks (default 200).
@@ -75,7 +119,6 @@ export function chunkText(text, chunkSize = 1000, overlap = 200) {
   while (startIndex < cleanedText.length) {
     let endIndex = startIndex + chunkSize;
 
-    // If not at end of text, try breaking at sentence or space boundary
     if (endIndex < cleanedText.length) {
       const lastPeriod = cleanedText.lastIndexOf(".", endIndex);
       const lastSpace = cleanedText.lastIndexOf(" ", endIndex);

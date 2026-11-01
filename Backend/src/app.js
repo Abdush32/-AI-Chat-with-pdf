@@ -25,7 +25,6 @@ import authRoutes from "./routes/auth.route.js";
 import categoryRoutes from "./routes/category.route.js";
 import uploadRoutes from "./routes/upload.route.js";
 
-import companionRoutes from "./routes/companion.route.js";
 import documentChatRoutes from "./routes/documentChat.route.js";
 
 
@@ -33,7 +32,6 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/upload", uploadRoutes);
 
-app.use("/api/v1/companions", companionRoutes);
 app.use("/api/v1/document-chat", documentChatRoutes);
 
 

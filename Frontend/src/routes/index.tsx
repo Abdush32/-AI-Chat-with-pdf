@@ -1,5 +1,4 @@
 import Dashboard from "../pages/Dashboard/Home";
-import AiGirl from "../pages/AiGirl";
 import ChatWithPdf from "../pages/ChatWithPdf";
 
 import UserProfiles from "../pages/UserProfiles";
@@ -10,12 +9,6 @@ const Routes = [
     path: "dashboard",
     name: "Dashboard",
     element: Dashboard,
-    authentication: true,
-  },
-  {
-    path: "ai-girlfriend",
-    name: "Ai Girlfriend",
-    element: AiGirl,
     authentication: true,
   },
   {

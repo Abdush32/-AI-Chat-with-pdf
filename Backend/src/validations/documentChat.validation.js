@@ -1,10 +1,13 @@
 import { z } from "zod";
 
+const uuidOrMongoIdRegex =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$|^[0-9a-fA-F]{24}$/i;
+
 export const createSessionSchema = z.object({
   body: z.object({
     documentId: z
       .string()
-      .refine((val) => !val || /^[0-9a-fA-F]{24}$/.test(val), {
+      .refine((val) => !val || uuidOrMongoIdRegex.test(val), {
         message: "Invalid document ID format",
       })
       .optional(),
@@ -15,7 +18,7 @@ export const createSessionSchema = z.object({
 
 export const sendMessageSchema = z.object({
   params: z.object({
-    sessionId: z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
+    sessionId: z.string().refine((val) => uuidOrMongoIdRegex.test(val), {
       message: "Invalid session ID format",
     }),
   }),

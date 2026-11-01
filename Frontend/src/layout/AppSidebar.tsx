@@ -31,11 +31,6 @@ const navItems: NavItem[] = [
     name: "Users",
     path: "/admin/users",
   },
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Ai Girlfriend",
-  //   path: "/admin/ai-girlfriend",
-  // },
   {
     icon: <CalenderIcon />,
     name: "Chatwith pdf",
